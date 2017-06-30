@@ -545,18 +545,7 @@ ret-ri-bu-tion ta-ble\
 ";
 
 var hyphenator = new Hyphenator(patterns, exceptions)
-delete patterns
-delete exceptions
 
-var main = function() {
-	var resp = process.argv[2].split(" ").map(function(word) {
-		return hyphenator.hyphenate_word(word).join("-");
-	}).join(" ");
-	console.log(resp);
-};
+hyphenator.constructor = Hyphenator;
 
-if (require.main === module) {
-	main();
-}
-
-module.exports.Hyphenator = hyphenator;
+module.exports = hyphenator;
