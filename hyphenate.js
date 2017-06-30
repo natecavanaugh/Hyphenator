@@ -10,105 +10,105 @@
 var _ = require("underscore")._;
 
 var MSRGX = /\s{2,}/g,
-    DRGX = /\d/,
-    CRGX = /[a-z]/,
-    ACRGX = /[.a-z]/;
+		DRGX = /\d/,
+		CRGX = /[a-z]/,
+		ACRGX = /[.a-z]/;
 
 var Hyphenator = function(patterns, exceptions) {
-  this.tree = {};
-  this.exceptions = {};
+	this.tree = {};
+	this.exceptions = {};
 
-  this._insert_exception = function(ex) {
-    var a = [0];
-    var x = ex.split(CRGX).forEach(function(h) {
-      a.push(h === "-" ? 1 : 0);
-    });
-    this.exceptions[ex.replace("-", "")] = a;
-  };
+	this._insert_exception = function(ex) {
+		var a = [0];
+		var x = ex.split(CRGX).forEach(function(h) {
+			a.push(h === "-" ? 1 : 0);
+		});
+		this.exceptions[ex.replace("-", "")] = a;
+	};
 
-  this._insert_pattern = function(pat) {
-    var chars = pat.replace(DRGX, ""),
-        points = pat.split(ACRGX).map(function(h) { return parseInt(h) || 0 }),
-        c = "",
-        t = this.tree;
+	this._insert_pattern = function(pat) {
+		var chars = pat.replace(DRGX, ""),
+				points = pat.split(ACRGX).map(function(h) { return parseInt(h) || 0 }),
+				c = "",
+				t = this.tree;
 
-    for (var i = 0; i < chars.length; i++) {
-      c = chars.charAt(i);
+		for (var i = 0; i < chars.length; i++) {
+			c = chars.charAt(i);
 
-      if (!(c in t)) {
-        t[c] = {};
-      }
-      t = t[c];
-    };
-    t[null] = points;
-  };
+			if (!(c in t)) {
+				t[c] = {};
+			}
+			t = t[c];
+		};
+		t[null] = points;
+	};
 
-  /**
-   * Hyphenates a word.
-   *
-   * @param string word
-   *   A word to hyphenate.
-   *
-   * @return string
-   *   The word, hyphenated.
-   */
-  this.hyphenate_word = function(word) {
-    if (word.length <= 4) {
-      return [word];
-    }
+	/**
+	 * Hyphenates a word.
+	 *
+	 * @param string word
+	 *   A word to hyphenate.
+	 *
+	 * @return string
+	 *   The word, hyphenated.
+	 */
+	this.hyphenate_word = function(word) {
+		if (word.length <= 4) {
+			return [word];
+		}
 
-    var points = [],
-        lword = word.toLowerCase();
+		var points = [],
+				lword = word.toLowerCase();
 
-    if (lword in this.exceptions) {
-      points = this.exceptions[lword];
-    }
-    else {
-      var work = "." + lword + ".";
+		if (lword in this.exceptions) {
+			points = this.exceptions[lword];
+		}
+		else {
+			var work = "." + lword + ".";
 
-      // Initialize array with 0s.
-      points = Array.apply(null, Array(work.length + 1)).map(function() {
-        return 0;
-      });
+			// Initialize array with 0s.
+			points = Array.apply(null, Array(work.length + 1)).map(function() {
+				return 0;
+			});
 
-      for (var i = 0; i < work.length; i++) {
-        var t = this.tree,
-            sub_work = work.substring(i);
+			for (var i = 0; i < work.length; i++) {
+				var t = this.tree,
+						sub_work = work.substring(i);
 
-        for (var n = 0; n < sub_work.length; n++) {
-          c = sub_work[n];
-          if (!(c in t)) break;
+				for (var n = 0; n < sub_work.length; n++) {
+					c = sub_work[n];
+					if (!(c in t)) break;
 
-          t = t[c];
-          if (!(null in t)) continue;
+					t = t[c];
+					if (!(null in t)) continue;
 
-          var p = t[null];
-          for (var j = 0; j < p.length; j++) {
-            points[i + j] = Math.max(points[i + j], p[j]);
-          }
-        }
-      }
-      points[1] = points[2] = points[points.length - 2] = points[points.length - 3] = 0
-    }
+					var p = t[null];
+					for (var j = 0; j < p.length; j++) {
+						points[i + j] = Math.max(points[i + j], p[j]);
+					}
+				}
+			}
+			points[1] = points[2] = points[points.length - 2] = points[points.length - 3] = 0
+		}
 
-    var pieces = [""],
-        zipped = _.zip(word, points.slice(2, points.length - 1));
+		var pieces = [""],
+				zipped = _.zip(word, points.slice(2, points.length - 1));
 
-    zipped.forEach(function(z) {
-      var c = z[0],
-          p = z[1];
+		zipped.forEach(function(z) {
+			var c = z[0],
+					p = z[1];
 
-      pieces[pieces.length - 1] += c;
-      if (p % 2) {
-        pieces.push("");
-      }
-    });
+			pieces[pieces.length - 1] += c;
+			if (p % 2) {
+				pieces.push("");
+			}
+		});
 
-    return pieces;
-  };
+		return pieces;
+	};
 
-  patterns.replace(MSRGX, " ").split(" ").forEach(this._insert_pattern.bind(this));
-  exceptions.replace(MSRGX, " ").split(" ").forEach(this._insert_exception.bind(this));
+	patterns.replace(MSRGX, " ").split(" ").forEach(this._insert_pattern.bind(this));
+	exceptions.replace(MSRGX, " ").split(" ").forEach(this._insert_exception.bind(this));
 };
 
 
@@ -549,14 +549,14 @@ delete patterns
 delete exceptions
 
 var main = function() {
-  var resp = process.argv[2].split(" ").map(function(word) {
-    return hyphenator.hyphenate_word(word).join("-");
-  }).join(" ");
-  console.log(resp);
+	var resp = process.argv[2].split(" ").map(function(word) {
+		return hyphenator.hyphenate_word(word).join("-");
+	}).join(" ");
+	console.log(resp);
 };
 
 if (require.main === module) {
-  main();
+	main();
 }
 
 module.exports.Hyphenator = hyphenator;
